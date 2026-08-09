@@ -201,7 +201,7 @@ export default function Dashboard() {
               {/* Panchang */}
               <div className="bg-[#1A2338]/60 backdrop-blur-xl p-6 rounded-2xl border border-[#F7F7F5]/10">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base font-medium">Today's Panchang</h3>
+                  <h3 className="text-base font-medium">Today&apos;s Panchang</h3>
                   <span className="text-xs text-[#F7F7F5]/40">
                     {new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
                   </span>

@@ -1,21 +1,7 @@
 export const runtime = 'edge';
 
 import { getDb } from '@/lib/db';
-import { birthProfiles, chartCache } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
-
-// In-memory fallback for local dev without D1
-const memoryProfiles: Array<{
-  id: number;
-  name: string;
-  date: string;
-  time: string;
-  place: string;
-  latitude: number;
-  longitude: number;
-  timezone: string;
-}> = [];
-let nextId = 1;
+import { birthProfiles } from '@/lib/db/schema';
 
 export async function GET() {
   const db = getDb();
@@ -42,16 +28,35 @@ export async function POST(request: Request) {
       );
     }
 
+    const parsedLatitude = Number(latitude);
+    const parsedLongitude = Number(longitude);
+    const hasLatitude = latitude !== undefined && latitude !== null && latitude !== '';
+    const hasLongitude = longitude !== undefined && longitude !== null && longitude !== '';
+
+    if (hasLatitude && (isNaN(parsedLatitude) || parsedLatitude < -90 || parsedLatitude > 90)) {
+      return Response.json(
+        { error: 'Invalid latitude (must be between -90 and 90)' },
+        { status: 400 }
+      );
+    }
+
+    if (hasLongitude && (isNaN(parsedLongitude) || parsedLongitude < -180 || parsedLongitude > 180)) {
+      return Response.json(
+        { error: 'Invalid longitude (must be between -180 and 180)' },
+        { status: 400 }
+      );
+    }
+
     const db = getDb();
     if (db) {
       try {
         const result = await db.insert(birthProfiles).values({
-          name,
+          name: String(name).slice(0, 100),
           date,
           time: time || '12:00',
           place: place || '',
-          latitude: latitude || 0,
-          longitude: longitude || 0,
+          latitude: hasLatitude ? parsedLatitude : 0,
+          longitude: hasLongitude ? parsedLongitude : 0,
           timezone: timezone || 'UTC',
         }).returning();
 

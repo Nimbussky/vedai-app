@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const responseStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const { chunk, provider } of stream) {
+          for await (const { chunk } of stream) {
             controller.enqueue(encoder.encode(chunk));
           }
         } catch (err) {

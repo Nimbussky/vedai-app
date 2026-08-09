@@ -17,7 +17,7 @@ export const geminiProvider: LLMProvider = {
     contents: [{ parts: [{ text: msg }] }],
     generationConfig: { temperature: 0.7 },
   }),
-  parseStreamChunk: (line) => {
+  parseStreamChunk: () => {
     // Gemini streams JSON array chunks — handled by dedicated parser
     return null;
   },

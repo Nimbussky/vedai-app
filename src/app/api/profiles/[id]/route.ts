@@ -4,18 +4,6 @@ import { getDb } from '@/lib/db';
 import { birthProfiles } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
-// In-memory fallback
-const memoryProfiles: Record<number, {
-  id: number;
-  name: string;
-  date: string;
-  time: string;
-  place: string;
-  latitude: number;
-  longitude: number;
-  timezone: string;
-}> = {};
-
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -60,6 +48,20 @@ export async function PUT(
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
   const { name, date, time, place, latitude, longitude, timezone } = body;
+
+  if (latitude !== undefined && latitude !== null && latitude !== '') {
+    const parsedLatitude = Number(latitude);
+    if (isNaN(parsedLatitude) || parsedLatitude < -90 || parsedLatitude > 90) {
+      return Response.json({ error: 'Invalid latitude (must be between -90 and 90)' }, { status: 400 });
+    }
+  }
+
+  if (longitude !== undefined && longitude !== null && longitude !== '') {
+    const parsedLongitude = Number(longitude);
+    if (isNaN(parsedLongitude) || parsedLongitude < -180 || parsedLongitude > 180) {
+      return Response.json({ error: 'Invalid longitude (must be between -180 and 180)' }, { status: 400 });
+    }
+  }
 
   const db = getDb();
   if (db) {

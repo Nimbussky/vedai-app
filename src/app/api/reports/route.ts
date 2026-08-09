@@ -60,7 +60,7 @@ async function getChartData(profile: { date: string; time?: string; latitude: nu
       headers: { 'Accept': 'application/json' },
       signal: controller.signal,
     });
-  } catch (err) {
+  } catch {
     clearTimeout(timeout);
     throw new Error('Chart fetch timeout or network error');
   }

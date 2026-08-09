@@ -25,8 +25,8 @@ export async function* streamChat(
   const providers = getActiveProviders();
 
   for (const provider of providers) {
-      // GLM gets one retry
-      const attempts = provider.slug === 'glm' ? 2 : 1;
+      // Groq gets one retry
+      const attempts = provider.slug === 'groq' ? 2 : 1;
 
     for (let attempt = 1; attempt <= attempts; attempt++) {
       let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -68,13 +68,13 @@ export async function* streamChat(
     }
   }
 
-  // All providers failed — try non-streaming GLM as last resort
-  console.log('[VedAI] All streaming failed, trying non-streaming GLM...');
-  const fallback = providers.find((p) => p.slug === 'glm');
+  // All providers failed — try non-streaming Groq as last resort
+  console.log('[VedAI] All streaming failed, trying non-streaming Groq...');
+  const fallback = providers.find((p) => p.slug === 'groq');
   if (fallback?.getApiKey()) {
     const result = await tryNonStreaming(fallback, trimmed, fullPrompt);
     if (result) {
-      yield { chunk: result, provider: 'glm-fallback' };
+      yield { chunk: result, provider: 'groq-fallback' };
       return;
     }
   }

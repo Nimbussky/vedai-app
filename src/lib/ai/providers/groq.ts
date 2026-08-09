@@ -1,13 +1,13 @@
 import type { LLMProvider } from './types';
 
-// Groq — Ultra-fast inference on Llama models, free tier
+// Groq — Ultra-fast inference on Llama models, free tier. PRIMARY backbone.
 export const groqProvider: LLMProvider = {
   name: 'Groq',
   slug: 'groq',
   url: 'https://api.groq.com/openai/v1/chat/completions',
   getApiKey: () => process.env.GROQ_API_KEY,
   model: 'llama-3.3-70b-versatile',
-  priority: 2,
+  priority: 1,
   supportsStreaming: true,
   buildHeaders: (key) => ({
     'Content-Type': 'application/json',

@@ -171,7 +171,7 @@ const NatalChart: React.FC<{ planets?: Planet[]; onPlanetClick?: (planet: Planet
           {selectedPlanet.nakshatra && (
             <p className="text-xs text-[#F7F7F5]/40">Nakshatra: {selectedPlanet.nakshatra}</p>
           )}
-          <p className="text-xs text-[#3B5BDB] mt-2">Click "AI Chat" for detailed interpretation</p>
+          <p className="text-xs text-[#3B5BDB] mt-2">Click &quot;AI Chat&quot; for detailed interpretation</p>
         </div>
       )}
 

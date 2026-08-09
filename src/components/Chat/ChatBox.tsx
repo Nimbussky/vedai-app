@@ -17,7 +17,7 @@ const MessageItem: React.FC<{ message: Message }> = ({ message }) => (
   </div>
 );
 
-const ChatBox: React.FC<{ initialMessages?: Message[] }> = ({ initialMessages = [] }) => {
+const ChatBox: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);

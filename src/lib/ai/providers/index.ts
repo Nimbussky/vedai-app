@@ -9,17 +9,35 @@ import { groqProvider } from './groq';
 import { openRouterProvider } from './openrouter';
 import { deepSeekProvider } from './deepseek';
 import { ollamaProvider } from './ollama';
+import {
+  zenMuxProvider,
+  kimiProvider,
+  qwenProvider,
+  tokenRouterDeepSeekProvider,
+  miniMaxProvider,
+  claudeProvider,
+  gptProvider,
+  huggingFaceProvider,
+} from './free-routes';
 
 // Master registry — order = default priority
 // Add new providers here, that's it!
 export const ALL_PROVIDERS: LLMProvider[] = [
-  glmProvider,
   groqProvider,
+  glmProvider,
   cerebrasProvider,
   deepSeekProvider,
   geminiProvider,
   mistralProvider,
   openRouterProvider,
+  zenMuxProvider,
+  kimiProvider,
+  qwenProvider,
+  tokenRouterDeepSeekProvider,
+  miniMaxProvider,
+  claudeProvider,
+  gptProvider,
+  huggingFaceProvider,
   ollamaProvider,
 ];
 
