@@ -1,5 +1,5 @@
 # VedAI - Progress History
-**Last Updated:** July 22, 2026
+**Last Updated:** September 19, 2026
 
 ---
 
@@ -132,7 +132,7 @@ VedAI/
 
 ## Known Issues (Future Fixes)
 
-1. React 18 + Next.js 15 version mismatch (needs React 19)
+1. React 18 + Next.js 15 version mismatch (FIXED: upgraded to React 19)
 2. No authentication (anyone can access)
 3. No Redis cache for VedAstro responses
 4. Missing divisional charts (D9, D10, etc.)
@@ -143,11 +143,11 @@ VedAI/
 
 ## API Keys Location
 
-**Desktop:** `C:\Users\SSD\Desktop\cloudflare api.txt`
+**Desktop:** `C:\\Users\\SSD\\Desktop\\cloudflare api.txt`
 - Cloudflare API token
 - D1 database ID
 
-**Desktop:** `C:\Users\SSD\Desktop\glm key.txt`
+**Desktop:** `C:\\Users\\SSD\\Desktop\\glm key.txt`
 - GLM API key
 
 ---

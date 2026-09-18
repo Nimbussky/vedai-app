@@ -38,9 +38,17 @@ yarn-error.log*
 # Drizzle
 drizzle/
 
+# Prisma leftovers (project uses Drizzle + D1 only)
+prisma/
+schema.sql
+
 # Local database
 *.db
 *.db-journal
+
+# Cloudflare / Vercel build artifacts
+.vercel/output/
+.wrangler/
 
 # QA outputs (local testing)
 qa_output*.md
