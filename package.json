@@ -1,17 +1,17 @@
 {
   "name": "vedai-app",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "dev": "next dev",
-    "build": "npx @cloudflare/next-on-pages",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "pages:build": "npx @cloudflare/next-on-pages",
-    "cf:deploy": "npm run build && npx wrangler pages deploy .vercel/output/static"
+    "cf:deploy": "npm run pages:build && npx wrangler pages deploy .vercel/output/static"
   },
   "dependencies": {
     "@cloudflare/d1": "^1.4.1",
