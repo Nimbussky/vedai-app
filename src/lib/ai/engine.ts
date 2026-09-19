@@ -1,12 +1,15 @@
 import type { LLMProvider } from './providers/types';
 import { getActiveProviders } from './providers';
 
-const PROVIDER_TIMEOUT_MS = 60000;
-const MAX_MESSAGE_LENGTH = 2000;
+const PROVIDER_TIMEOUT_MS = 90000;
+/** Longer chats — OmniRouter / Engine 2 */
+const MAX_MESSAGE_LENGTH = 12000;
+const MAX_SYSTEM_EXTRA = 8000;
 
 // ============================================
-// VEDAI HYBRID BRAIN ENGINE
-// Tries providers by priority, never crashes
+// VEDAI HYBRID BRAIN ENGINE 2 (OmniRouter)
+// Multi-provider cascade — never runs out of tokens
+// Order: free tiers first, then paid keys, then static
 // ============================================
 
 export async function* streamChat(
@@ -19,19 +22,21 @@ export async function* streamChat(
 
   let fullPrompt = systemPrompt;
   if (chartData) {
-    fullPrompt += `\n\nTHE USER'S BIRTH CHART:\n${JSON.stringify(chartData, null, 2)}\nUse this chart data to give personalized readings.`;
+    const chartJson = JSON.stringify(chartData, null, 2).slice(0, MAX_SYSTEM_EXTRA);
+    fullPrompt += `\n\nTHE USER'S BIRTH CHART:\n${chartJson}\nUse this chart data to give personalized readings.`;
   }
 
   const providers = getActiveProviders();
 
   for (const provider of providers) {
-      // Groq gets one retry
-      const attempts = provider.slug === 'groq' ? 2 : 1;
+    // Extra retries on gateway providers (OpenRouter / free routers)
+    const attempts =
+      provider.slug === 'openrouter' || provider.slug === 'groq' ? 3 : 1;
 
     for (let attempt = 1; attempt <= attempts; attempt++) {
       let timeout: ReturnType<typeof setTimeout> | undefined;
       try {
-        console.log(`[VedAI] Trying ${provider.name} (attempt ${attempt}/${attempts})`);
+        console.log(`[VedAI Omni] Trying ${provider.name} (attempt ${attempt}/${attempts})`);
 
         const controller = new AbortController();
         timeout = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
@@ -51,25 +56,26 @@ export async function* streamChat(
         if (!response.ok) {
           clearTimeout(timeout);
           const err = await response.text().catch(() => '');
-          console.error(`[VedAI] ${provider.name} HTTP ${response.status}:`, err.slice(0, 200));
-          break; // Don't retry HTTP errors
+          console.error(`[VedAI Omni] ${provider.name} HTTP ${response.status}:`, err.slice(0, 200));
+          // Rate limit → try next attempt or next provider
+          if (response.status === 429 || response.status === 503) continue;
+          break;
         }
 
-        console.log(`[VedAI] ${provider.name} SUCCESS`);
+        console.log(`[VedAI Omni] ${provider.name} SUCCESS`);
         yield* streamFromProvider(provider, response);
         clearTimeout(timeout);
-        return; // Success, done
+        return;
 
       } catch (err: unknown) {
         if (timeout) clearTimeout(timeout);
         const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-        console.error(`[VedAI] ${provider.name} ${isTimeout ? 'TIMEOUT' : 'CRASHED'}:`, err);
+        console.error(`[VedAI Omni] ${provider.name} ${isTimeout ? 'TIMEOUT' : 'CRASHED'}:`, err);
       }
     }
   }
 
-  // All providers failed — try non-streaming Groq as last resort
-  console.log('[VedAI] All streaming failed, trying non-streaming Groq...');
+  console.log('[VedAI Omni] All streaming failed, trying non-streaming Groq...');
   const fallback = providers.find((p) => p.slug === 'groq');
   if (fallback?.getApiKey()) {
     const result = await tryNonStreaming(fallback, trimmed, fullPrompt);
@@ -79,7 +85,16 @@ export async function* streamChat(
     }
   }
 
-  // Absolute last resort — static response
+  // OpenRouter non-stream last try
+  const or = providers.find((p) => p.slug === 'openrouter');
+  if (or?.getApiKey()) {
+    const result = await tryNonStreaming(or, trimmed, fullPrompt);
+    if (result) {
+      yield { chunk: result, provider: 'openrouter-fallback' };
+      return;
+    }
+  }
+
   yield { chunk: getStaticFallback(chartData), provider: 'static' };
 }
 
@@ -90,19 +105,16 @@ async function* streamFromProvider(provider: LLMProvider, response: Response) {
 
   let buffer = '';
 
-  // Gemini uses JSON array format, everything else is OpenAI SSE
   if (provider.slug === 'gemini') {
     yield* streamGeminiResponse(reader, decoder);
     return;
   }
 
-  // Ollama uses NDJSON, not SSE
   if (provider.slug === 'ollama') {
     yield* streamOllamaResponse(reader, decoder);
     return;
   }
 
-  // Standard OpenAI SSE format (GLM, Cerebras, Groq, Mistral, DeepSeek, OpenRouter)
   try {
     while (true) {
       const { done, value } = await reader.read();
@@ -119,7 +131,7 @@ async function* streamFromProvider(provider: LLMProvider, response: Response) {
       }
     }
   } catch (err) {
-    console.error(`[VedAI] ${provider.name} stream read error:`, err);
+    console.error(`[VedAI Omni] ${provider.name} stream read error:`, err);
     throw err;
   }
 }
@@ -162,7 +174,7 @@ async function* streamGeminiResponse(
       }
     }
   } catch (err) {
-    console.error('[VedAI] Gemini stream error:', err);
+    console.error('[VedAI Omni] Gemini stream error:', err);
     throw err;
   }
 }
@@ -192,7 +204,7 @@ async function* streamOllamaResponse(
       }
     }
   } catch (err) {
-    console.error('[VedAI] Ollama stream error:', err);
+    console.error('[VedAI Omni] Ollama stream error:', err);
     throw err;
   }
 }

@@ -1,6 +1,5 @@
 import type { LLMProvider } from './types';
 
-// All available providers — import and register here
 import { glmProvider } from './glm';
 import { cerebrasProvider } from './cerebras';
 import { geminiProvider } from './gemini';
@@ -20,17 +19,20 @@ import {
   huggingFaceProvider,
 } from './free-routes';
 
-// Master registry — order = default priority
-// Add new providers here, that's it!
+/**
+ * OmniRouter Engine 2 registry
+ * Priority = try order (lower first)
+ * OpenRouter free cascade sits early so token limits rotate across many free models.
+ */
 export const ALL_PROVIDERS: LLMProvider[] = [
-  groqProvider,
-  glmProvider,
-  cerebrasProvider,
-  deepSeekProvider,
-  geminiProvider,
-  mistralProvider,
-  openRouterProvider,
-  zenMuxProvider,
+  groqProvider,           // 1 fast free
+  glmProvider,            // 2 generous free
+  cerebrasProvider,       // 3 fast free
+  openRouterProvider,     // 4 free multi-model router (never alone)
+  deepSeekProvider,       // 5
+  geminiProvider,         // 6
+  mistralProvider,        // 7
+  zenMuxProvider,         // 8+
   kimiProvider,
   qwenProvider,
   tokenRouterDeepSeekProvider,
@@ -38,26 +40,22 @@ export const ALL_PROVIDERS: LLMProvider[] = [
   claudeProvider,
   gptProvider,
   huggingFaceProvider,
-  ollamaProvider,
+  ollamaProvider,         // local last
 ];
 
-// Get providers that have valid API keys, sorted by priority
 export function getActiveProviders(): LLMProvider[] {
   return ALL_PROVIDERS
     .filter((p) => {
-      // Ollama is always available (local)
       if (p.slug === 'ollama') return true;
       return !!p.getApiKey();
     })
     .sort((a, b) => a.priority - b.priority);
 }
 
-// Get a specific provider by slug
 export function getProvider(slug: string): LLMProvider | undefined {
   return ALL_PROVIDERS.find((p) => p.slug === slug);
 }
 
-// List all registered providers with their status (for admin panel)
 export function getProviderStatus() {
   return ALL_PROVIDERS.map((p) => ({
     name: p.name,
