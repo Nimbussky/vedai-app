@@ -1,9 +1,9 @@
 {
   "name": "vedai-app",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "engines": {
-    "node": ">=22"
+    "node": ">=18"
   },
   "scripts": {
     "dev": "next dev",
@@ -14,7 +14,6 @@
     "cf:deploy": "npm run pages:build && npx wrangler pages deploy .vercel/output/static"
   },
   "dependencies": {
-    "@cloudflare/d1": "^1.4.1",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.42.2",
     "lucide-react": "^1.24.0",
@@ -32,6 +31,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.0.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.0.0"
   }
 }
